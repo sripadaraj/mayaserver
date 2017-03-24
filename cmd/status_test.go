@@ -9,12 +9,15 @@ import (
     "encoding/json"
  
 )
+// Configuration encapsulates the result of reading the JSON configuration
+// file.
 
 type Configuration struct {
     URL      []string
-    Mem string
+    Memcached string
 }
-
+// loadConfig loads a configuration file in JSON format and returns a
+// Configuration instance.
 
 func loadConfig(path string) (Configuration, error) {
 
@@ -44,9 +47,9 @@ func main() {
         return
     }
 
-    sites := make(map[string]*Site, len(configuration.URLs))
+    sites := make(map[string]*Site, len(configuration.URL))
 
-    for _, url := range configuration.URLs {
+    for _, url := range configuration.URL {
         sites[url] = &Site{url, UNCHECKED}
     }
 
