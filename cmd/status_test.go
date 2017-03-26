@@ -1,8 +1,6 @@
 Package cmd 
 import (
- “fmt”
- “os”
-"bytes"
+ "bytes"
 "strings"
 "os/signal"
 "github.com/mitchellh/cli"
