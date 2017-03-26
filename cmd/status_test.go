@@ -1,88 +1,61 @@
-package main
-
-import (
-   
-    "fmt"
-    "github.com/mitchellh/cli"
-    "os"
-    "time"
-    "encoding/json"
+Package cmd (
  
+“fmt”
+"bytes"
+"strings"
+"os/signal"
+“os”
+
+"github.com/mitchellh/cli"
+"github.com/openebs/mayaserver/lib/config"
+"github.com/openebs/mayaserver/lib/server"
+
 )
+type StatusCommand struct {
 
-type Configuration struct {
-    URL      []string
-    Mem string
+Revision		string
+Status			string
+Ui 			cli.Ui
+
+}
+// a cli implementation that prints the status 
+// the status of server is tried to print here
+
+func (c *StatusCommand) Help() string {
+return ""
 }
 
+func (c *StatusCommand) Run(_ []string) int {
+var statusString bytes.Buffer
 
-func loadConfig(path string) (Configuration, error) {
+fmt.Fprintf(&statusString, "Mayaserver s%s", c.Status)
 
-    file, _ := os.Open(path)
-    defer file.Close()
-
-    decoder := json.NewDecoder(file)
-    configuration := Configuration{}
-    err := decoder.Decode(&configuration)
-
-    return configuration, err
+c.Ui.Output(versionString.String())
+return 0
 }
 
+//this function prints the status
+func (c *StatusCommand) Synopsis() string {
 
-func main() {
-    type Result struct {
-        url    string
-        status Status
-    }
-
-    rc := make(chan Result)
-
-    configuration, err := loadConfig("config.json")
-
-    if err != nil {
-        fmt.Println("Error :", err)
-        return
-    }
-
-    sites := make(map[string]*Site, len(configuration.URLs))
-
-    for _, url := range configuration.URLs {
-        sites[url] = &Site{url, UNCHECKED}
-    }
-
-    mc := memcache.New(configuration.Memcached)
-
-    sites_output := make(map[string]bool)
-
-    for {
-        for _, site := range sites {
-            go func(site *Site, rc chan Result) {
-                status, _ := site.Status()
-                rc <- Result{site.url, status}
-            }(site, rc)
-        }
-
-        for i := 0; i < len(sites); i++ {
-            res := <-rc
-            site := sites[res.url]
-            if site.last_status != res.status {
-                sites[res.url].last_status = res.status
-            }
-        }
-
-        for k, v := range sites {
-            sites_output[k] = v.last_status == 2
-        }
-
-        site_json, err := json.Marshal(sites_output)
-
-        if err != nil {
-            panic(err)
-        }
-        mc.Set(&memcache.Item{
-            Key:   "mission_control.sites",
-            Value: site_json,
-        })
-        time.Sleep(time.Second * 5)
-    }
+return "Prints the Mayaserver status"
 }
+//this is to print the ip address using the hostloop
+
+func (c *StatusCommand) Run(_ []string) int {
+
+name, err := os.Hostname()
+//checking eith any errors using the error handeling exception 
+if err != nil {
+     fmt.Printf("Oops: %v\n", err)
+     return
+}
+
+addrs, err := net.LookupHost(name)
+if err != nil {
+    fmt.Printf("Oops: %v\n", err)
+    return
+}
+//if no error the adrress is printed
+for _, a := range addrs {
+    fmt.Println(a)
+} 
