@@ -46,8 +46,8 @@ func (f *ports)  readMayaConfig() *config.MayaConfig {
 	cmdConfig := &config.MayaConfig{
 		Ports: &config.Ports{},
 
- flag.Usage = usage
-  flag.Parse()
+ flag.Usage == usage
+  flag.Parse(),
 
   args := flag.Args()
 }
